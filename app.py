@@ -27,7 +27,7 @@ app.secret_key = "supersecretkey"
 
 # Sender and receiver
 sender_email = "rockshieldai@gmail.com"
-receiver_email = "myemail@gmail.com"
+receiver_email = os.environ.get("RECEIVER_EMAIL")
 app_password = os.environ.get("MY_EMAIL_PASSWORD")  
 
 # --- Robust Model and Data Loading ---
