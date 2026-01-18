@@ -27,23 +27,26 @@ app.secret_key = "supersecretkey"
 
 # Sender and receiver
 sender_email = "rockshieldai@gmail.com"
-receiver_email = "aryan.phanse03@gmail.com"
-app_password = "glhb ccto xawo cbjt"  # Replace with your 16-character App Password
+receiver_email = "myemail@gmail.com"
+app_password = os.environ.get("MY_EMAIL_PASSWORD")  
 
 # --- Robust Model and Data Loading ---
 try:
     #Loading Strain Models
-    model = joblib.load(r"D:\SIH_2025\project\models\Strain Model\strain_model_lgbm.pkl")
-    encoder = joblib.load(r"D:\SIH_2025\project\models\Strain Model\label_encoder.pkl")
-    scaler = joblib.load(r"D:\SIH_2025\project\models\Strain Model\scaler_strain.pkl")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    #Loading Rockfall Models
-    model_path = r"D:\SIH_2025\project\models\RockFall Model\rockfall_model.pkl"
-    scaler_path = r"D:\SIH_2025\project\models\RockFall Model\scaler.pkl"
-    feature_columns_path = r"D:\SIH_2025\project\models\RockFall Model\feature_columns.pkl"
-    
-    # Load data for visualization
-    df = pd.read_csv(r"D:\SIH_2025\project\script\kusmunda_DEM_features.csv")
+# Loading Strain Models
+model = joblib.load(os.path.join(base_dir, "models", "Strain Model", "strain_model_lgbm.pkl"))
+encoder = joblib.load(os.path.join(base_dir, "models", "Strain Model", "label_encoder.pkl"))
+scaler = joblib.load(os.path.join(base_dir, "models", "Strain Model", "scaler_strain.pkl"))
+
+# Loading Rockfall Models
+model_path = os.path.join(base_dir, "models", "RockFall Model", "rockfall_model.pkl")
+scaler_path = os.path.join(base_dir, "models", "RockFall Model", "scaler.pkl")
+feature_columns_path = os.path.join(base_dir, "models", "RockFall Model", "feature_columns.pkl")
+
+# Load CSV
+df = pd.read_csv(os.path.join(base_dir, "script", "kusmunda_DEM_features.csv"))
 
 except FileNotFoundError as e:
     print(f"FATAL ERROR: A required model or data file was not found.", file=sys.stderr)
@@ -172,16 +175,30 @@ fig.update_layout(
 dash_app.layout = html.Div([dcc.Graph(id="3d-surface", figure=fig, style={"height": "95vh"}), dcc.Store(id="clicked-point-data"), html.Div(id="dummy-output")])
 
 @dash_app.callback(Output("clicked-point-data", "data"), Input("3d-surface", "clickData"), prevent_initial_call=True)
+@dash_app.callback(Output("clicked-point-data", "data"), Input("3d-surface", "clickData"), prevent_initial_call=True)
 def handle_click(clickData):
     if not clickData:
         raise dash.exceptions.PreventUpdate
     p = clickData["points"][0]
     idx = np.argmin((X - p["x"])**2 + (Y - p["y"])**2 + (Z - p["z"])**2)
-    data = {"X": round(p["x"],2), "Y": round(p["y"],2), "Z": round(p["z"],2), "Elevation": round(Z[idx],2), "Slope": round(Slope[idx],2), "Roughness": round(Roughness[idx],2), "Sector": df.loc[idx, "Sector"]}
+    
+    data = {
+        "X": round(p["x"],2), 
+        "Y": round(p["y"],2), 
+        "Z": round(p["z"],2), 
+        "Elevation": round(Z[idx],2), 
+        "Slope": round(Slope[idx],2), 
+        "Roughness": round(Roughness[idx],2), 
+        "Sector": df.loc[idx, "Sector"]
+    }
+    
+    # DIRECT SAVE (No network request needed)
     try:
-        requests.post("http://127.0.0.1:5000/save_coords", json=data)
+        with open("selected_coords.json", "w") as f:
+            json.dump(data, f, indent=4)
     except Exception as e:
-        print(f"Error sending clicked point data to Flask: {e}", file=sys.stderr)
+        print(f"Error saving data: {e}", file=sys.stderr)
+        
     return data
 
 dash_app.clientside_callback(
