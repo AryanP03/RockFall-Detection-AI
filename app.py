@@ -35,18 +35,18 @@ try:
     #Loading Strain Models
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Loading Strain Models
-model = joblib.load(os.path.join(base_dir, "models", "Strain Model", "strain_model_lgbm.pkl"))
-encoder = joblib.load(os.path.join(base_dir, "models", "Strain Model", "label_encoder.pkl"))
-scaler = joblib.load(os.path.join(base_dir, "models", "Strain Model", "scaler_strain.pkl"))
+    # Loading Strain Models
+    model = joblib.load(os.path.join(base_dir, "models", "Strain Model", "strain_model_lgbm.pkl"))
+    encoder = joblib.load(os.path.join(base_dir, "models", "Strain Model", "label_encoder.pkl"))
+    scaler = joblib.load(os.path.join(base_dir, "models", "Strain Model", "scaler_strain.pkl"))
 
-# Loading Rockfall Models
-model_path = os.path.join(base_dir, "models", "RockFall Model", "rockfall_model.pkl")
-scaler_path = os.path.join(base_dir, "models", "RockFall Model", "scaler.pkl")
-feature_columns_path = os.path.join(base_dir, "models", "RockFall Model", "feature_columns.pkl")
+    # Loading Rockfall Models
+    model_path = os.path.join(base_dir, "models", "RockFall Model", "rockfall_model.pkl")
+    scaler_path = os.path.join(base_dir, "models", "RockFall Model", "scaler.pkl")
+    feature_columns_path = os.path.join(base_dir, "models", "RockFall Model", "feature_columns.pkl")
 
-# Load CSV
-df = pd.read_csv(os.path.join(base_dir, "script", "kusmunda_DEM_features.csv"))
+    # Load CSV
+    df = pd.read_csv(os.path.join(base_dir, "script", "kusmunda_DEM_features.csv"))
 
 except FileNotFoundError as e:
     print(f"FATAL ERROR: A required model or data file was not found.", file=sys.stderr)
